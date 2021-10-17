@@ -1,8 +1,29 @@
+import {Parser as jQuery} from "acorn";
+import cloneDeep from "../clone-deep-master";
+
+
 let graph = {}
 graphInit(graph);
 
+let twoRealPlayers=1;
+
 let firstPlayerRow = 9;
 let firstPlayerColumn = 5;
+let fpWallsAmount = 10;
+
+let secondPlayerRow = 1;
+let secondPlayerColumn = 5;
+
+let dots = [
+  [1, 1, 1, 1, 1, 1, 1, 1],
+  [1, 1, 1, 1, 1, 1, 1, 1],
+  [1, 1, 1, 1, 1, 1, 1, 1],
+  [1, 1, 1, 1, 1, 1, 1, 1],
+  [1, 1, 1, 1, 1, 1, 1, 1],
+  [1, 1, 1, 1, 1, 1, 1, 1],
+  [1, 1, 1, 1, 1, 1, 1, 1],
+  [1, 1, 1, 1, 1, 1, 1, 1],
+];
 
 /*
 function VtoMCellConverter(rowOrColumn) {
@@ -12,6 +33,7 @@ function VtoMCellConverter(rowOrColumn) {
 function MtoVCellConverter(rowOrColumn) {
   return parseInt(rowOrColumn) * 2 - 1
 }*/
+
 /*
 export function CellEventModel(rowCell, columnCell) {
 
@@ -25,20 +47,21 @@ export function CellEventModel(rowCell, columnCell) {
   }
 }*/
 
-export function changePlayerPos(newRow,newColumn){
+export function changePlayerPos(newRow, newColumn) {
   firstPlayerRow = newRow
-  firstPlayerColumn=newColumn
+  firstPlayerColumn = newColumn
 }
 
-export function getFirstPlayerRow(){
+export function getFirstPlayerRow() {
   return firstPlayerRow
 }
-export function getFirstPlayerColumn(){
+
+export function getFirstPlayerColumn() {
   return firstPlayerColumn
 }
 
-export function getFirstPlayerNeighbors(){
-  let playerCell=graph[firstPlayerRow+"-"+firstPlayerColumn]
+export function getFirstPlayerNeighbors() {
+  let playerCell = graph[firstPlayerRow + "-" + firstPlayerColumn]
   return [playerCell.leftN, playerCell.rightN, playerCell.topN, playerCell.bottomN]
 }
 
@@ -46,17 +69,19 @@ export function getFirstPlayerNeighbors(){
 export function isPlayerNeighbor(askedID, isFirstPlayer) {
 
   let askedCell = graph[askedID]
-  if(isFirstPlayer){
-  let playerCell = graph[firstPlayerRow+"-"+firstPlayerColumn]
-  let neighbors = [playerCell.leftN, playerCell.rightN, playerCell.topN, playerCell.bottomN]
-  for (let neighborCell of neighbors) {
-    if (askedCell === neighborCell) {
-      return true
+  if (isFirstPlayer) {
+    let playerCell = graph[firstPlayerRow + "-" + firstPlayerColumn]
+    let neighbors = [playerCell.leftN, playerCell.rightN, playerCell.topN, playerCell.bottomN]
+    for (let neighborCell of neighbors) {
+      if (askedCell === neighborCell) {
+        return true
+      }
     }
-  }}
+  }
   return false
 }
 
+/*
 export function isPlayerNeighbor1(graph, askedRow, askedColumn, playerRow, playerColumn) {
   askedRow = VtoMCellConverter(askedRow)
   askedColumn = VtoMCellConverter(askedColumn)
@@ -72,7 +97,7 @@ export function isPlayerNeighbor1(graph, askedRow, askedColumn, playerRow, playe
   }
   return false
 }
-
+*/
 export function graphInit(graph) {
 
   let first = 1;
@@ -102,77 +127,150 @@ export function graphInit(graph) {
 }
 
 
-function canAddWall(graph, rowN, columnN, wallType) {
+export function canAddWall(rowN, columnN, wallType) {
   if (wallType === "vborder") {
-    let leftCellRow = rowN;
-    let leftCellColumn = columnN;
+    let leftCellRow = parseInt(rowN);
+    let leftCellColumn = parseInt(columnN);
+
+console.log("canReachAtLeastOne")
+//console.log(canReachAtLeastOne(graph, firstPlayerRow+"-"+firstPlayerColumn, 1))
     if (graph[leftCellRow + "-" + leftCellColumn].rightN === null
-      || (graph[(leftCellRow - 1) + "-" + leftCellColumn] === null)
-      || (graph[(leftCellRow - 1) + "-" + leftCellColumn] != null && graph[(leftCellRow + 1) + "-" + leftCellColumn].rightN === null)
-      || (graph[(leftCellRow + 1) + "-" + leftCellColumn] != null && graph[(leftCellRow - 1) + "-" + leftCellColumn].rightN === null)
-      /*|| !canReachAtLeastOne(addWall(graph /*створити копію,rowN,columnN,wallType), /*start_point, appointedRow) */) {
+      || (graph[leftCellRow + 1 + "-" + leftCellColumn] != null && graph[leftCellRow + 1 + "-" + leftCellColumn].rightN === null)
+      || leftCellRow===9
+      || ((graph[leftCellRow + 1 + "-" + leftCellColumn] != null && graph[leftCellRow + 1 + "-" + leftCellColumn].topN === null)
+        && (graph[(leftCellRow + 1) + "-" + (leftCellColumn + 1)] != null && graph[(leftCellRow + 1) + "-" + (leftCellColumn + 1)].topN === null)
+      && !dots[leftCellRow-1][leftCellColumn-1])
+      ||!canReachAtLeastOne(graph, firstPlayerRow+"-"+firstPlayerColumn, 1, leftCellRow,leftCellColumn,wallType)
+
+
+     ) {console.log("can`t Reach vertical")
       return false
     } else return true
   }
 
   if (wallType === "hborder") {
-    let BottomCellRow = rowN;
-    let BottomCellColumn = columnN;
+    let BottomCellRow = parseInt(rowN);
+    let BottomCellColumn = parseInt(columnN);
+    console.log("hborder")
+console.log(graph[BottomCellRow + "-" + BottomCellColumn].rightN === null)
+
+
     if (graph[BottomCellRow + "-" + BottomCellColumn].topN === null
+      || (graph[BottomCellRow + "-" + (BottomCellColumn + 1)] != null && graph[BottomCellRow + "-" + (BottomCellColumn + 1)].topN === null)
+      || BottomCellColumn === 9
+      || ((graph[BottomCellRow + "-" + (BottomCellColumn+1)] != null && graph[BottomCellRow + "-" + (BottomCellColumn+1)].leftN === null)
+        && (graph[(BottomCellRow-1) + "-" + (BottomCellColumn+1)] != null && graph[(BottomCellRow-1) + "-" + (BottomCellColumn+1)].leftN === null)
+        && !dots[BottomCellRow-2][BottomCellColumn-1]
+      )||!canReachAtLeastOne(graph, firstPlayerRow+"-"+firstPlayerColumn, 1,BottomCellRow,BottomCellColumn,wallType)
+      //|| (graph[BottomCellRow + "-" + (BottomCellColumn + 1)] != null && graph[BottomCellRow + "-" + (BottomCellColumn + 1)].topN === null)
+      /*graph[BottomCellRow + "-" + BottomCellColumn].topN === null
       || (graph[BottomCellRow + "-" + (BottomCellColumn + 1)] === null)
       || (graph[BottomCellRow + "-" + (BottomCellColumn + 1)] != null && graph[BottomCellRow + "-" + (BottomCellColumn + 1)].topN === null)
-      || (graph[BottomCellRow + "-" + (BottomCellColumn - 1)] != null && graph[BottomCellRow + "-" + (BottomCellColumn - 1)].topN === null)) {
+      || (graph[BottomCellRow + "-" + (BottomCellColumn - 1)] != null && graph[BottomCellRow + "-" + (BottomCellColumn - 1)].topN === null)
+      || !canReachAtLeastOne(addWall(graph,rowN,columnN,wallType), firstPlayerRow+"-"+firstPlayerColumn, 1)*/) {
+      console.log("can`t Reach horizon")
       return false
     } else return true
   }
 
 }
 
-function addWall(graph, rowN, columnN, wallType) {
+export function addWallToGraph(rowN, columnN, wallType) {
+  graph = addWall(graph,dots, rowN, columnN, wallType)
+
+}
+
+// вертикально лівий сусід
+// горизонтальний нижній сусід
+function addWall(graph,dots, rowN, columnN, wallType) {
 
   if (wallType === "vborder") {
     let leftCellRow = rowN;
     let leftCellColumn = columnN;
+
     graph[leftCellRow + "-" + leftCellColumn].rightN = null
     graph[leftCellRow + "-" + (leftCellColumn + 1)].leftN = null
-    graph[(leftCellRow + 1) + "-" + leftCellColumn].rightN = null
-    graph[(leftCellRow + 1) + "-" + (leftCellColumn + 1)].leftN = null
+
+    dots[leftCellRow-1][leftCellColumn-1]=0
+
+    if (graph[(leftCellRow + 1) + "-" + leftCellColumn] != null) {
+      graph[(leftCellRow + 1) + "-" + leftCellColumn].rightN = null
+      graph[(leftCellRow + 1) + "-" + (leftCellColumn + 1)].leftN = null
+    }
   } else if (wallType === "hborder") {
     let BottomCellRow = rowN;
     let BottomCellColumn = columnN;
+
     graph[BottomCellRow + "-" + BottomCellColumn].topN = null
-    graph[(BottomCellRow + 1) + "-" + BottomCellColumn].bottomN = null
-    graph[BottomCellRow + "-" + (BottomCellColumn + 1)].topN = null
-    graph[(BottomCellRow + 1) + "-" + (BottomCellColumn + 1)].bottomN = null
+    graph[(BottomCellRow - 1) + "-" + BottomCellColumn].bottomN = null
+    dots[BottomCellRow-2][BottomCellColumn-1]=0
+
+    if (graph[BottomCellRow + "-" + (BottomCellColumn + 1)] != null) {
+      graph[BottomCellRow + "-" + (BottomCellColumn + 1)].topN = null
+      graph[(BottomCellRow - 1) + "-" + (BottomCellColumn + 1)].bottomN = null
+    }
   }
   return graph;
 
 }
+function deleteWall(rowN, columnN, wallType){
 
-function canReachAtLeastOne(graph, start_point, appointedRow) {
+  if (wallType=== "vborder"){
+    graph[rowN + "-" + (columnN+1)].leftN = columnN  < 1 ? null : graph[rowN + "-" + (columnN)];
+    graph[rowN + "-" + columnN].rightN = columnN + 1 > 9 ? null : graph[rowN + "-" + (columnN + 1)];
+    if(graph[rowN+1 + "-" + columnN]!=null){
+      graph[rowN+1 + "-" + (columnN+1)].leftN = columnN  < 1 ? null : graph[rowN+1 + "-" + (columnN)];
+      graph[rowN+1 + "-" + columnN].rightN = columnN + 1 > 9 ? null : graph[rowN+1 + "-" + (columnN + 1)];
+    }
+  }
+  if (wallType=== "hborder"){
+    //if(rowN - 1 < 9){}
+    graph[rowN + "-" + columnN].topN = rowN - 1 < 1 ? null : graph[(rowN - 1) + "-" + columnN];
+    graph[(rowN-1) + "-" + columnN].bottomN = rowN  > 9 ? null : graph[(rowN ) + "-" + columnN];
+
+    console.log(graph[(rowN) + "-" + columnN])
+    //console.log(graph[(rowN-1) + "-" + columnN])
+    if(rowN + "-" + (columnN+1)!=null){
+      graph[rowN + "-" + (columnN+1)].topN = rowN - 1 < 1 ? null : graph[(rowN - 1) + "-" + (columnN+1)];
+      graph[rowN-1 + "-" + (columnN+1)].bottomN = rowN  > 9 ? null : graph[(rowN ) + "-" + (columnN+1)];
+
+      //console.log(graph[(rowN) + "-" + columnN])
+      //console.log(graph[(rowN-1) + "-" + columnN])
+    }
+  }
+  /*
+      graph[i + "-" + j].leftN = j - 1 < first ? null : graph[i + "-" + (j - 1)];
+      graph[i + "-" + j].rightN = j + 1 > last ? null : graph[i + "-" + (j + 1)];
+      graph[i + "-" + j].bottomN = i + 1 > last ? null : graph[(i + 1) + "-" + j];
+      graph[i + "-" + j].topN = i - 1 < first ? null : graph[(i - 1) + "-" + j];*/
+}
+function canReachAtLeastOne(graph, startID, appointedRow,rowN,column,wallType) {
 
   let first = 1
   let last = 9
   for (let j = first; j <= last; j++) {
-    if (canReach(graph, graph[start_point], graph[appointedRow + "-" + j])) {
-      return true;
+    if (canReach(addWall(graph,JSON.parse(JSON.stringify(dots)),rowN,column,wallType), graph[startID], graph[appointedRow + "-" + j])) {
+      deleteWall(rowN,column,wallType)
+  return true;
     }
   }
+  console.log(graph)
+  deleteWall(rowN,column,wallType)
   return false;
 }
 
-function canReach(graph, start, finish) {
+function canReach(graph, startCell, finishCell) {
   // graph - мап обьектов
-  // start - начальная вершина
-  // finish - пункт назначения
+  // startCell - начальная вершина
+  // finishCell - пункт назначения
 
   //graph=JSON.parse(JSON.stringify(graph))
   // инициализируем очередь
   let queue = []
-  // добавляем start в очередь
-  queue.push(start)
-  // помечаем start как посещенную вершину во избежание повторного добавления в очередь
-  start.visited = true
+  // добавляем startCell в очередь
+  queue.push(startCell)
+  // помечаем startCell как посещенную вершину во избежание повторного добавления в очередь
+  startCell.visited = true
   while (queue.length > 0) {
     // удаляем первый (верхний) элемент из очереди
     let currentCell = queue.shift()
@@ -186,20 +284,33 @@ function canReach(graph, start, finish) {
           // помечаем вершину как посещенную
           neighborCell.visited = true
           // если сосед является пунктом назначения, мы победили
-          if (neighborCell === finish) {
-            for (let element of graph) {
-              element.visited = false
+
+
+          try {
+
+            if (neighborCell === finishCell) {
+              console.log('graph', graph)
+
+              /*for (let element in graph) {
+                element.visited = false
+              }*/
+              Object.keys(graph).forEach(key => graph[key].visited = false)
+              return true
             }
-            return true
+          } catch (e) {
+            console.log(e)
           }
+
+
         }
       }
     }
   }
-  // если finish не обнаружено, значит пункта назначения достичь невозможно
-  for (let element of graph) {
+  // если finishCell не обнаружено, значит пункта назначения достичь невозможно
+  /*for (let element of graph) {
     element.visited = false
-  }
+  }*/
+  Object.keys(graph).forEach(key => graph[key].visited = false)
   return false
 }
 

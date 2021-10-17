@@ -4,7 +4,9 @@ import {
   changePlayerPos,
   getFirstPlayerRow,
   getFirstPlayerColumn,
-  getFirstPlayerNeighbors
+  getFirstPlayerNeighbors,
+  canAddWall,
+  addWallToGraph
 } from './model'
 
 
@@ -114,7 +116,7 @@ function generate_table() {
             generatePlayer(getFirstPlayerRowConverted(), getFirstPlayerColumnConverted(), 1)
           }
           playerCellTouched = 0
-          if (lightCells.length != 0) {
+          if (lightCells.length !== 0) {
             for (let lightCell of lightCells) {
               lightCell.style.backgroundColor = "#ccc"
 
@@ -123,15 +125,36 @@ function generate_table() {
         }
 
         if (event.target.dataset.type === 'vborder') {
-          modifyVerticalWallColor(event.target.id, event.target.dataset.row, event.target.dataset.column)
+          //console.log(event.target)
+          //console.log(event.target.dataset.row)
 
+          console.log(parseInt(event.target.dataset.row), VtoMCellConverter(event.target.dataset.row))
+          console.log(parseInt(event.target.dataset.column)-1, VtoMCellConverter(parseInt(event.target.dataset.column)-1))
+
+          if(canAddWall(VtoMCellConverter(parseInt(event.target.dataset.row)),VtoMCellConverter(parseInt(event.target.dataset.column)-1),event.target.dataset.type)){
+            addWallToGraph(VtoMCellConverter(parseInt(event.target.dataset.row)),VtoMCellConverter(parseInt(event.target.dataset.column)-1),event.target.dataset.type)
+
+            console.log("я тут")
+            modifyVerticalWallColor(event.target.id, event.target.dataset.row, event.target.dataset.column)
+          }
         } else if (event.target.dataset.type === 'hborder') {
-          modifyHorizontalWallColor(event.target.id, event.target.dataset.row, event.target.dataset.column)
+
+          console.log(parseInt(event.target.dataset.row)+1, VtoMCellConverter(parseInt(event.target.dataset.row)+1))
+          console.log(parseInt(event.target.dataset.column), VtoMCellConverter(parseInt(event.target.dataset.column)))
+
+          if(canAddWall(VtoMCellConverter(parseInt(event.target.dataset.row)+1),VtoMCellConverter(parseInt(event.target.dataset.column)),event.target.dataset.type)){
+            addWallToGraph(VtoMCellConverter(parseInt(event.target.dataset.row)+1),VtoMCellConverter(parseInt(event.target.dataset.column)),event.target.dataset.type)
+
+            console.log("я тут")
+            modifyHorizontalWallColor(event.target.id, event.target.dataset.row, event.target.dataset.column)
+          }
+
+          //modifyHorizontalWallColor(event.target.id, event.target.dataset.row, event.target.dataset.column)
 
         }
         /*cellEvent(event.target.dataset.row, event.target.dataset.column)*/
         else {
-
+console.log("фігня")
         }
 
       }
