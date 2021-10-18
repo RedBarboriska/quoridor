@@ -23,23 +23,49 @@
 </head>
 
 <body>
-
+<div id="header">
+  <div> Поточний гравець: <img id="currentPlayer"
+                               src="https://cdn130.picsart.com/343302759059211.png?type=webp&to=min&r=640" width="30">
+  </div>
+  <div class="walls-parent">
+    <div class="walls">Лишилося стін у <img src="https://cdn130.picsart.com/343302759059211.png?type=webp&to=min&r=640" width="15">:
+      <div id="firstPlayerWalls"></div>
+    </div>
+    <div class="walls">Лишилося стін у <img
+      src="https://www.pngkit.com/png/full/184-1848773_danganronpa-v3-monokuma-sprite-1-danganronpa-monokuma.png"
+      width="15">:
+      <div id="secondPlayerWalls"></div>
+    </div>
+  </div>
+  <form><input type="submit" value="restart" ></form>
+</div>
 <div id="game-board"></div>
 
 
-
-  <!-- Add your site or application content here -->
+<!-- Add your site or application content here -->
 <!-- <p>Hello world! This is HTML5 Boilerplate.</p>-->
-  <script src="js/vendor/modernizr-3.11.2.min.js"></script>
-  <script src="js/plugins.js"></script>
-  <script src="js/main.js"></script>
+<script src="js/vendor/modernizr-3.11.2.min.js"></script>
+<script src="js/plugins.js"></script>
+<script src="js/main.js"></script>
 
 <!-- Google Analytics: change UA-XXXXX-Y to be your site's ID. -->
-  <script>
-    window.ga = function () { ga.q.push(arguments) }; ga.q = []; ga.l = +new Date;
-    ga('create', 'UA-XXXXX-Y', 'auto'); ga('set', 'anonymizeIp', true); ga('set', 'transport', 'beacon'); ga('send', 'pageview')
-  </script>
-  <script src="https://www.google-analytics.com/analytics.js" async></script>
+
+<canvas id="gameOver" width="200" height="200" style="border:1px solid     #c3c3c3;">
+
+</canvas>
+
+<script>
+  window.ga = function () {
+    ga.q.push(arguments)
+  };
+  ga.q = [];
+  ga.l = +new Date;
+  ga('create', 'UA-XXXXX-Y', 'auto');
+  ga('set', 'anonymizeIp', true);
+  ga('set', 'transport', 'beacon');
+  ga('send', 'pageview')
+</script>
+<script src="https://www.google-analytics.com/analytics.js" async></script>
 </body>
 
 </html>

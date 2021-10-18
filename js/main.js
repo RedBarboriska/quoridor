@@ -1,4 +1,3 @@
-
 import {
   isPlayerNeighbor,
   changePlayerPos,
@@ -6,7 +5,18 @@ import {
   getFirstPlayerColumn,
   getFirstPlayerNeighbors,
   canAddWall,
-  addWallToGraph
+  addWallToGraph,
+
+  getCurrentPlayer,
+  getCurrentPlayerRow,
+  getCurrentPlayerColumn,
+  changeCurrentPlayerPos,
+  isCurrentPlayerNeighbor,
+  getCurrentPlayerNeighbors,
+  isFinish,
+
+  getFirstPlayerWalls,
+  getSecondPlayerWalls
 } from './model'
 
 
@@ -21,14 +31,18 @@ let lightCells = []
 //let graph = {}
 //graphInit(graph);
 //console.log(graph)
+function getCurrentPlayerIMGURL(currentPlayer){
+  if (!currentPlayer) {return "https://cdn130.picsart.com/343302759059211.png"}
+  else {return "https://www.pngkit.com/png/full/184-1848773_danganronpa-v3-monokuma-sprite-1-danganronpa-monokuma.png"}
+}
 
-function getFirstPlayerRowConverted() {
-  return MtoVCellConverter(getFirstPlayerRow())
+function getPlayerRowConverted() {
+  return MtoVCellConverter(getCurrentPlayerRow())
 
 }
 
-function getFirstPlayerColumnConverted() {
-  return MtoVCellConverter(getFirstPlayerColumn())
+function getPlayerColumnConverted() {
+  return MtoVCellConverter(getCurrentPlayerColumn())
 }
 
 function VtoMCellConverter(rowOrColumn) {
@@ -40,11 +54,25 @@ function MtoVCellConverter(rowOrColumn) {
 }
 
 window.onload = function () {
-  generatePlayer(getFirstPlayerRowConverted(), getFirstPlayerColumnConverted(), 1)
-  generatePlayer(1, 9, 0)
+  generatePlayer(17, 9,0)
+  generatePlayer(1, 9,1)
+
+  let gameOver=document.getElementById("gameOver");
+  gameOver.width = 500;
+  gameOver.height = 300;
+  gameOver.style.position="absolute";
+  gameOver.style.left = "-500px";
+  gameOver.style.top = "-300px";
+  gameOver.style.backgroundColor = "blue";
+
+  document.getElementById("firstPlayerWalls").innerText = getFirstPlayerWalls()
+  document.getElementById("secondPlayerWalls").innerText = getSecondPlayerWalls()
+
 }
 
 function generate_table() {
+
+
   // get the reference for the body
   //console.log(sum(1,2));
   let body = document.getElementById("game-board");
@@ -92,11 +120,13 @@ function generate_table() {
   body.appendChild(tbl);
   body.addEventListener('click', event => {
       if (event.target.id) {
-        console.log(event.target.dataset.type, event.target.id, event.target.dataset.row, event.target.dataset.column)
-        if (event.target.dataset.type === 'cell' && event.target.dataset.row === getFirstPlayerRowConverted().toString() && event.target.dataset.column === getFirstPlayerColumnConverted().toString()) {
+        let currentPlayer = JSON.parse(JSON.stringify(getCurrentPlayer()))
+        console.log("currentPlayer"+currentPlayer)
+         //console.log(event.target.dataset.type, event.target.id, event.target.dataset.row, event.target.dataset.column)
+        if (event.target.dataset.type === 'cell' && event.target.dataset.row === getPlayerRowConverted().toString() && event.target.dataset.column === getPlayerColumnConverted().toString()) {
           console.log("тикнули гравця")
           playerCellTouched = 1; //вибираємо куди піти
-          for (let neighborCell of getFirstPlayerNeighbors()) {
+          for (let neighborCell of getCurrentPlayerNeighbors()) {
             console.log(neighborCell)
             if (neighborCell != null) {
               let cell = document.getElementById(MtoVCellConverter(neighborCell.pos.row) + "-" + MtoVCellConverter(neighborCell.pos.column))
@@ -107,13 +137,25 @@ function generate_table() {
             }
           }
           /*підсвітити cell поруч в які можна піти! (в яких сусіди не нал)*/
-        } else {
-          if (playerCellTouched && isPlayerNeighbor(VtoMCellConverter(event.target.dataset.row) + "-" + VtoMCellConverter(event.target.dataset.column), 1)) {
-            removePlayer(getFirstPlayerRowConverted(), getFirstPlayerColumnConverted())
-            changePlayerPos(VtoMCellConverter(event.target.dataset.row), VtoMCellConverter(event.target.dataset.column))
+        }
+      else {
+          if (playerCellTouched && isCurrentPlayerNeighbor(VtoMCellConverter(event.target.dataset.row) + "-" + VtoMCellConverter(event.target.dataset.column))) {
+            removePlayer(getPlayerRowConverted(), getPlayerColumnConverted())
+
+
+            changeCurrentPlayerPos(VtoMCellConverter(event.target.dataset.row), VtoMCellConverter(event.target.dataset.column), currentPlayer)
+            chCPhtml()
+            let playerRow = event.target.dataset.row
+            let playerColumn = event.target.dataset.column
+            console.log("генерили тут",playerRow+"-"+playerColumn)
             //playerRow = event.target.dataset.row
             //playerColumn = event.target.dataset.column
-            generatePlayer(getFirstPlayerRowConverted(), getFirstPlayerColumnConverted(), 1)
+            console.log("генеримо тут",playerRow+"-"+playerColumn)
+            if(isFinish()===1){alert("Game over! Виграв гравець")}
+            generatePlayer(playerRow, playerColumn,currentPlayer)
+            //if(isFinish){alert("Game over! Виграв гравець")
+            //if
+
           }
           playerCellTouched = 0
           if (lightCells.length !== 0) {
@@ -129,22 +171,27 @@ function generate_table() {
           //console.log(event.target.dataset.row)
 
           console.log(parseInt(event.target.dataset.row), VtoMCellConverter(event.target.dataset.row))
-          console.log(parseInt(event.target.dataset.column)-1, VtoMCellConverter(parseInt(event.target.dataset.column)-1))
+          console.log(parseInt(event.target.dataset.column) - 1, VtoMCellConverter(parseInt(event.target.dataset.column) - 1))
 
-          if(canAddWall(VtoMCellConverter(parseInt(event.target.dataset.row)),VtoMCellConverter(parseInt(event.target.dataset.column)-1),event.target.dataset.type)){
-            addWallToGraph(VtoMCellConverter(parseInt(event.target.dataset.row)),VtoMCellConverter(parseInt(event.target.dataset.column)-1),event.target.dataset.type)
-
+          if (canAddWall(VtoMCellConverter(parseInt(event.target.dataset.row)), VtoMCellConverter(parseInt(event.target.dataset.column) - 1), event.target.dataset.type)) {
+            addWallToGraph(VtoMCellConverter(parseInt(event.target.dataset.row)), VtoMCellConverter(parseInt(event.target.dataset.column) - 1), event.target.dataset.type)
+            chCPhtml()
+            document.getElementById("firstPlayerWalls").innerText = getFirstPlayerWalls()
+            document.getElementById("secondPlayerWalls").innerText = getSecondPlayerWalls()
             console.log("я тут")
             modifyVerticalWallColor(event.target.id, event.target.dataset.row, event.target.dataset.column)
           }
-        } else if (event.target.dataset.type === 'hborder') {
+        }
+        else if (event.target.dataset.type === 'hborder') {
 
-          console.log(parseInt(event.target.dataset.row)+1, VtoMCellConverter(parseInt(event.target.dataset.row)+1))
-          console.log(parseInt(event.target.dataset.column), VtoMCellConverter(parseInt(event.target.dataset.column)))
+          //console.log(parseInt(event.target.dataset.row) + 1, VtoMCellConverter(parseInt(event.target.dataset.row) + 1))
+          //console.log(parseInt(event.target.dataset.column), VtoMCellConverter(parseInt(event.target.dataset.column)))
 
-          if(canAddWall(VtoMCellConverter(parseInt(event.target.dataset.row)+1),VtoMCellConverter(parseInt(event.target.dataset.column)),event.target.dataset.type)){
-            addWallToGraph(VtoMCellConverter(parseInt(event.target.dataset.row)+1),VtoMCellConverter(parseInt(event.target.dataset.column)),event.target.dataset.type)
-
+          if (canAddWall(VtoMCellConverter(parseInt(event.target.dataset.row) + 1), VtoMCellConverter(parseInt(event.target.dataset.column)), event.target.dataset.type)) {
+            addWallToGraph(VtoMCellConverter(parseInt(event.target.dataset.row) + 1), VtoMCellConverter(parseInt(event.target.dataset.column)), event.target.dataset.type)
+            chCPhtml()
+            document.getElementById("firstPlayerWalls").innerText = getFirstPlayerWalls()
+            document.getElementById("secondPlayerWalls").innerText = getSecondPlayerWalls()
             console.log("я тут")
             modifyHorizontalWallColor(event.target.id, event.target.dataset.row, event.target.dataset.column)
           }
@@ -154,7 +201,8 @@ function generate_table() {
         }
         /*cellEvent(event.target.dataset.row, event.target.dataset.column)*/
         else {
-console.log("фігня")
+          console.log("фігня")
+          console.log(getCurrentPlayerRow()+""+getCurrentPlayerColumn())
         }
 
       }
@@ -186,6 +234,13 @@ console.log("фігня")
    })*/
 }
 
+function chCPhtml(){
+  getCurrentPlayerIMGURL(getCurrentPlayer())
+  if (document.getElementById('currentPlayer').src !==getCurrentPlayerIMGURL(getCurrentPlayer())){
+    console.log(getCurrentPlayerIMGURL(getCurrentPlayer()))
+    document.getElementById('currentPlayer').src =getCurrentPlayerIMGURL(getCurrentPlayer())}
+
+}
 
 // Функция, изменяющая цвет
 function modifyVerticalWallColor(elemId, elemDataRow, elemDataColumn, color = "#22cad2") {
@@ -215,7 +270,11 @@ function modifyHorizontalWallColor(elemId, elemDataRow, elemDataColumn, color = 
   elementUnderDot.style.backgroundColor = color;
 }
 
-function generatePlayer(row, column, isMainPlayer) {
+function invCurrentPlayer(){
+
+}
+
+function generatePlayer(row, column, currentPlayer) {
   /*row=(row+1)/2
   column=(column+1)/2*/
   let playerCell = document.getElementById(row + "-" + column)
@@ -226,11 +285,12 @@ function generatePlayer(row, column, isMainPlayer) {
     playerImg.dataset.column=column;                      просто міняємо фон ячейки
     playerImg.style.width = "40px";
     playerImg.style.height = "40px";*/
-  if (isMainPlayer) {
+  if (!currentPlayer) {
 
     /*playerImg.id = "playerImg"
     playerImg.src = playerSRC;*/
-    playerCell.style.backgroundImage = "url('https://cdn130.picsart.com/343302759059211.png?type=webp&to=min&r=640')";
+    //playerCell.style.backgroundImage = "url('https://cdn130.picsart.com/343302759059211.png')";
+    playerCell.style.backgroundImage = "url('https://cdn130.picsart.com/343302759059211.png')";
     playerCell.style.backgroundSize = "cover"
   } else {
     /* playerImg.id = "compImg"

@@ -55,11 +55,21 @@ body {
   width: 6%; */
   background-color: #ccc;
   border: 1px solid #a51dff;
+
+}
+#header {
+  display: flex;
+  flex-direction: row;
 }
 
-
-
-
+.walls-parent{
+  display: flex;
+  flex-direction: column;
+}
+.walls{
+  display: flex;
+  flex-direction: row;
+}
 
 
 
