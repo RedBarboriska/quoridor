@@ -5,30 +5,38 @@ import {Parser as jQuery} from "acorn";
 let graph = {}
 graphInit(graph);
 
-let isTwoRealPlayers = 1;
+let isTwoRealPlayers = 0;
 let isGameOver = 0
-
+let newWall = {
+  rowN: 1,
+  columnN: 1,
+  wallType: "hboard",
+  player: 0
+}
 let firstPlayer = {
+  prevPos: {
+    row: 9,
+    column: 5,
+  },
   row: 9,
   column: 5,
   wallsAmount: 10,
-  finishCellRow: 1
+  finishCellRow: 1,
+  changePos:0
 }
 let secondPlayer = {
+  prevPos: {
+    row: 1,
+    column: 5,
+  },
   row: 1,
   column: 5,
   wallsAmount: 10,
-  finishCellRow: 9
+  finishCellRow: 9,
+  changePos:0
 }
 let players = [firstPlayer, secondPlayer]
 let currentPlayer = players[0]
-
-let firstPlayerRow = 9;
-let firstPlayerColumn = 5;
-let fpWallsAmount = 10;
-
-let secondPlayerRow = 1;
-let secondPlayerColumn = 5;
 
 
 let dots = []
@@ -42,28 +50,6 @@ dotsInit(dots)/*= [
   [1, 1, 1, 1, 1, 1, 1, 1],
   [1, 1, 1, 1, 1, 1, 1, 1],
 ];*/
-
-/*
-function VtoMCellConverter(rowOrColumn) {
-  return (parseInt(rowOrColumn) + 1) / 2
-}*/
-/*
-function MtoVCellConverter(rowOrColumn) {
-  return parseInt(rowOrColumn) * 2 - 1
-}*/
-
-/*
-export function CellEventModel(rowCell, columnCell) {
-
-  if (rowCell=== firstPlayerRow && columnCell === firstPlayerColumn) {
-    firstPlayerCellTouched=1;
-  }
-  else if  (firstPlayerCellTouched && isPlayerNeighbor(rowCell + "" + columnCell, firstPlayerRow + "" + firstPlayerColumn)) {
-//переміщаємось
-
-
-  }
-}*/
 
 function dotsInit(dots) {
 
@@ -84,14 +70,61 @@ function dotsInit(dots) {
 
 }
 
+export function playII(){
+  isTwoRealPlayers=0
+}
+export function playFriend(){
+  isTwoRealPlayers=1
+}
+
+export function restart(){
+  isGameOver = 0
+  newWall = {
+    rowN: 1,
+    columnN: 1,
+    wallType: "hboard",
+    player: 0
+  }
+  firstPlayer = {
+    prevPos: {
+      row: 9,
+      column: 5,
+    },
+    row: 9,
+    column: 5,
+    wallsAmount: 10,
+    finishCellRow: 1,
+    changePos:0
+  }
+  secondPlayer = {
+    prevPos: {
+      row: 1,
+      column: 5,
+    },
+    row: 1,
+    column: 5,
+    wallsAmount: 10,
+    finishCellRow: 9,
+    changePos:0
+  }
+  graphInit(graph);
+  dotsInit(dots)
+}
 export function getCurrentPlayer() {
   console.log(currentPlayer)
   if (currentPlayer === firstPlayer) return 0
   else return 1
 }
-
+export function getPlayer(num){
+  return players[num]
+}
 export function isFinish() {
   return isGameOver
+}
+
+export function getIsTwoRealPlayers() {
+  return isTwoRealPlayers
+
 }
 
 export function getFirstPlayerWalls() {
@@ -114,8 +147,11 @@ export function getCurrentPlayerColumn() {
 }
 
 export function changeCurrentPlayerPos(newRow, newColumn) {
+  currentPlayer.prevPos.row = JSON.parse(JSON.stringify(currentPlayer.row))
+  currentPlayer.prevPos.column = JSON.parse(JSON.stringify(currentPlayer.column))
   currentPlayer.row = newRow
   currentPlayer.column = newColumn
+  currentPlayer.changePos=1
   console.log(currentPlayer.row)
   console.log(currentPlayer.column)
   console.log(currentPlayer.finishCellRow)
@@ -142,28 +178,37 @@ function changeCurrentPlayer() {
     currentPlayer = players[0]
   }
   if (currentPlayer === players[1] && !isTwoRealPlayers) {
+    console.log("тут йде")
     goII()
+
   }
 }
 
 function goII() {
 
-  if (Math.round(Math.random())) {
-    let neighbors = getCurrentPlayerNeighbors()
-    let notNullNeighbors = []
-    for (let i = 0; i < neighbors.length; i++) {
-      if (neighbors[i] != null) {
-        notNullNeighbors.push(neighbors[i])
+  while (true) {
+    if (Math.round(Math.random())) {
+      let neighbors = getCurrentPlayerNeighbors()
+      console.log(neighbors)
+      let notNullNeighbors = []
+      for (let i = 0; i < neighbors.length; i++) {
+        if (neighbors[i] != null) {
+          notNullNeighbors.push(neighbors[i])
+        }
       }
-    }
-    let newN = Math.round(Math.random() * notNullNeighbors.length)
-    secondPlayer.row = notNullNeighbors[newN].row
-    secondPlayer.column = notNullNeighbors[newN].column
-  } else {
+      console.log(notNullNeighbors)
+      let newN = Math.round(Math.random() * (notNullNeighbors.length - 1))
+      console.log(newN)
+      changeCurrentPlayerPos(notNullNeighbors[newN].pos.row, notNullNeighbors[newN].pos.column)
+      //secondPlayer.row = notNullNeighbors[newN].pos.row
+      //secondPlayer.column = notNullNeighbors[newN].pos.column
+      console.log(secondPlayer)
+      return;
+    } else {
 
-    while (true) {
-      let row = Math.round(Math.random() * 9)
-      let column = Math.round(Math.random() * 9)
+      let row = Math.round(Math.random() * (9 - 1) + 1)
+      let column = Math.round(Math.random() * (9 - 1) + 1)
+      console.log("ставимо тут " + row + "-" + column)
       let wallType
       if (Math.round(Math.random())) {
         wallType = "vborder"
@@ -171,21 +216,52 @@ function goII() {
         wallType = "hborder"
       }
       if (canAddWall(row, column, wallType)) {
-        addWall(graph, dots, row, column, wallType)
+        addWallToGraph(row, column, wallType)
+        console.log(newWall)
         return
       }
+
     }
   }
 
 
 }
 
-export function getFirstPlayerRow() {
-  return firstPlayer.row
+export function getPlayerRow(num) {
+  if (num) {
+    console.log(secondPlayer.row)
+    return secondPlayer.row
+  } else {
+    return firstPlayer.row
+  }
 }
 
-export function getFirstPlayerColumn() {
-  return firstPlayer.column
+export function getPlayerColumn(num) {
+  if (num) {
+    return secondPlayer.column
+  } else {
+    return firstPlayer.column
+  }
+}
+
+export function getPlayerPrevRow(num) {
+  if (num) {
+    return secondPlayer.prevPos.row
+  } else {
+    return firstPlayer.prevPos.row
+  }
+}
+
+export function getPlayerPrevColumn(num) {
+  if (num) {
+    return secondPlayer.prevPos.column
+  } else {
+    return firstPlayer.prevPos.column
+  }
+}
+
+export function getNewWall() {
+  return newWall
 }
 
 export function getFirstPlayerNeighbors() {
@@ -378,7 +454,19 @@ export function canAddWall(rowN, columnN, wallType) {
 export function addWallToGraph(rowN, columnN, wallType) {
   graph = addWall(graph, dots, rowN, columnN, wallType)
   currentPlayer.wallsAmount = currentPlayer.wallsAmount - 1
+  currentPlayer.changePos=0
+  newWall.rowN = rowN
+  newWall.columnN = columnN
+  newWall.wallType = wallType
+  if (currentPlayer === players[0]) {
+    newWall.player = 0
+  } else {
+    newWall.player = 1
+  }
+  console.log("newWall", newWall)
+  console.log("currentPlayer", currentPlayer)
   changeCurrentPlayer()
+  console.log("currentPlayer", currentPlayer)
 }
 
 // вертикально лівий сусід

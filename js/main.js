@@ -1,11 +1,18 @@
 import {
   isPlayerNeighbor,
   changePlayerPos,
-  getFirstPlayerRow,
-  getFirstPlayerColumn,
+  getPlayerRow,
+  getPlayerColumn,
+  getPlayerPrevRow,
+  getPlayerPrevColumn,
+  getNewWall,
   getFirstPlayerNeighbors,
   canAddWall,
   addWallToGraph,
+  getPlayer,
+  restart,
+  playFriend,
+  playII,
 
   getCurrentPlayer,
   getCurrentPlayerRow,
@@ -16,7 +23,8 @@ import {
   isFinish,
 
   getFirstPlayerWalls,
-  getSecondPlayerWalls
+  getSecondPlayerWalls,
+  getIsTwoRealPlayers
 } from './model'
 
 
@@ -31,18 +39,41 @@ let lightCells = []
 //let graph = {}
 //graphInit(graph);
 //console.log(graph)
-function getCurrentPlayerIMGURL(currentPlayer){
-  if (!currentPlayer) {return "https://cdn130.picsart.com/343302759059211.png"}
-  else {return "https://www.pngkit.com/png/full/184-1848773_danganronpa-v3-monokuma-sprite-1-danganronpa-monokuma.png"}
+function getCurrentPlayerIMGURL(currentPlayer) {
+  if (!currentPlayer) {
+    return "https://cdn130.picsart.com/343302759059211.png"
+  } else {
+    return "https://www.pngkit.com/png/full/184-1848773_danganronpa-v3-monokuma-sprite-1-danganronpa-monokuma.png"
+  }
 }
 
-function getPlayerRowConverted() {
+function getCurrentPlayerRowConverted() {
   return MtoVCellConverter(getCurrentPlayerRow())
 
 }
 
-function getPlayerColumnConverted() {
+function getCurrentPlayerColumnConverted() {
   return MtoVCellConverter(getCurrentPlayerColumn())
+}
+
+function getPlayerRowConverted(num) {
+  return MtoVCellConverter(getPlayerRow(num))
+
+}
+
+function getPlayerColumnConverted(num) {
+  return MtoVCellConverter(getPlayerColumn(num))
+}
+
+function getPlayerPrevRowConverted(num) {
+  console.log(MtoVCellConverter(getPlayerPrevRow(num)))
+  return MtoVCellConverter(getPlayerPrevRow(num))
+
+}
+
+function getPlayerPrevColumnConverted(num) {
+  console.log(MtoVCellConverter(getPlayerPrevColumn(num)))
+  return MtoVCellConverter(getPlayerPrevColumn(num))
 }
 
 function VtoMCellConverter(rowOrColumn) {
@@ -54,13 +85,13 @@ function MtoVCellConverter(rowOrColumn) {
 }
 
 window.onload = function () {
-  generatePlayer(17, 9,0)
-  generatePlayer(1, 9,1)
+  generatePlayer(17, 9, 0)
+  generatePlayer(1, 9, 1)
 
-  let gameOver=document.getElementById("gameOver");
+  let gameOver = document.getElementById("gameOver");
   gameOver.width = 500;
   gameOver.height = 300;
-  gameOver.style.position="absolute";
+  gameOver.style.position = "absolute";
   gameOver.style.left = "-500px";
   gameOver.style.top = "-300px";
   gameOver.style.backgroundColor = "blue";
@@ -120,10 +151,23 @@ function generate_table() {
   body.appendChild(tbl);
   body.addEventListener('click', event => {
       if (event.target.id) {
+        if(event.target.id==='playII'){
+          restart()
+          playII()
+          generatePlayer(17, 9, 0)
+          generatePlayer(1, 9, 1)
+        }else if (event.target.id==='playFriend'){
+          restart()
+          playFriend()
+          generatePlayer(17, 9, 0)
+          generatePlayer(1, 9, 1)
+        }
+
+        if (isFinish()) {return}
         let currentPlayer = JSON.parse(JSON.stringify(getCurrentPlayer()))
-        console.log("currentPlayer"+currentPlayer)
-         //console.log(event.target.dataset.type, event.target.id, event.target.dataset.row, event.target.dataset.column)
-        if (event.target.dataset.type === 'cell' && event.target.dataset.row === getPlayerRowConverted().toString() && event.target.dataset.column === getPlayerColumnConverted().toString()) {
+        console.log("currentPlayer" + currentPlayer)
+        //console.log(event.target.dataset.type, event.target.id, event.target.dataset.row, event.target.dataset.column)
+        if (event.target.dataset.type === 'cell' && event.target.dataset.row === getCurrentPlayerRowConverted().toString() && event.target.dataset.column === getCurrentPlayerColumnConverted().toString()) {
           console.log("тикнули гравця")
           playerCellTouched = 1; //вибираємо куди піти
           for (let neighborCell of getCurrentPlayerNeighbors()) {
@@ -137,22 +181,27 @@ function generate_table() {
             }
           }
           /*підсвітити cell поруч в які можна піти! (в яких сусіди не нал)*/
-        }
-      else {
+        } else {
           if (playerCellTouched && isCurrentPlayerNeighbor(VtoMCellConverter(event.target.dataset.row) + "-" + VtoMCellConverter(event.target.dataset.column))) {
-            removePlayer(getPlayerRowConverted(), getPlayerColumnConverted())
+            removePlayer(getCurrentPlayerRowConverted(), getCurrentPlayerColumnConverted())
 
 
             changeCurrentPlayerPos(VtoMCellConverter(event.target.dataset.row), VtoMCellConverter(event.target.dataset.column), currentPlayer)
             chCPhtml()
             let playerRow = event.target.dataset.row
             let playerColumn = event.target.dataset.column
-            console.log("генерили тут",playerRow+"-"+playerColumn)
+            console.log("генерили тут", playerRow + "-" + playerColumn)
             //playerRow = event.target.dataset.row
             //playerColumn = event.target.dataset.column
-            console.log("генеримо тут",playerRow+"-"+playerColumn)
-            if(isFinish()===1){alert("Game over! Виграв гравець")}
-            generatePlayer(playerRow, playerColumn,currentPlayer)
+            console.log("генеримо тут", playerRow + "-" + playerColumn)
+            if (isFinish() === 1) {
+              alert("Game over! Виграв гравець")
+            }
+            generatePlayer(playerRow, playerColumn, currentPlayer)
+            if (!getIsTwoRealPlayers()/*&&getCurrentPlayer()===1*/) {
+              console.log("II запускається")
+              goII()
+            }
             //if(isFinish){alert("Game over! Виграв гравець")
             //if
 
@@ -170,8 +219,8 @@ function generate_table() {
           //console.log(event.target)
           //console.log(event.target.dataset.row)
 
-          console.log(parseInt(event.target.dataset.row), VtoMCellConverter(event.target.dataset.row))
-          console.log(parseInt(event.target.dataset.column) - 1, VtoMCellConverter(parseInt(event.target.dataset.column) - 1))
+          //console.log(parseInt(event.target.dataset.row), VtoMCellConverter(event.target.dataset.row))
+          //console.log(parseInt(event.target.dataset.column) - 1, VtoMCellConverter(parseInt(event.target.dataset.column) - 1))
 
           if (canAddWall(VtoMCellConverter(parseInt(event.target.dataset.row)), VtoMCellConverter(parseInt(event.target.dataset.column) - 1), event.target.dataset.type)) {
             addWallToGraph(VtoMCellConverter(parseInt(event.target.dataset.row)), VtoMCellConverter(parseInt(event.target.dataset.column) - 1), event.target.dataset.type)
@@ -179,10 +228,14 @@ function generate_table() {
             document.getElementById("firstPlayerWalls").innerText = getFirstPlayerWalls()
             document.getElementById("secondPlayerWalls").innerText = getSecondPlayerWalls()
             console.log("я тут")
+
             modifyVerticalWallColor(event.target.id, event.target.dataset.row, event.target.dataset.column)
+            if (!getIsTwoRealPlayers()/*&&getCurrentPlayer()===1*/) {
+              console.log("II запускається")
+              goII()
+            }
           }
-        }
-        else if (event.target.dataset.type === 'hborder') {
+        } else if (event.target.dataset.type === 'hborder') {
 
           //console.log(parseInt(event.target.dataset.row) + 1, VtoMCellConverter(parseInt(event.target.dataset.row) + 1))
           //console.log(parseInt(event.target.dataset.column), VtoMCellConverter(parseInt(event.target.dataset.column)))
@@ -194,6 +247,10 @@ function generate_table() {
             document.getElementById("secondPlayerWalls").innerText = getSecondPlayerWalls()
             console.log("я тут")
             modifyHorizontalWallColor(event.target.id, event.target.dataset.row, event.target.dataset.column)
+            if (!getIsTwoRealPlayers()/*&&getCurrentPlayer()===1*/) {
+              console.log("II запускається")
+              goII()
+            }
           }
 
           //modifyHorizontalWallColor(event.target.id, event.target.dataset.row, event.target.dataset.column)
@@ -202,12 +259,30 @@ function generate_table() {
         /*cellEvent(event.target.dataset.row, event.target.dataset.column)*/
         else {
           console.log("фігня")
-          console.log(getCurrentPlayerRow()+""+getCurrentPlayerColumn())
+          console.log(getCurrentPlayerRow() + "" + getCurrentPlayerColumn())
         }
 
       }
     }
   )
+
+  function goII() {
+    if (getPlayer(1).changePos) {
+      removePlayer(getPlayerPrevRowConverted(1), getPlayerPrevColumnConverted(1))
+      generatePlayer(getPlayerRowConverted(1), getPlayerColumnConverted(1), 1)
+    }
+    console.log("wallType", getNewWall().wallType)
+    if (getNewWall().wallType === "vborder" && getNewWall().player === 1) {
+
+      modifyVerticalWallColor(MtoVCellConverter(getNewWall().rowN) + "-" + (parseInt(MtoVCellConverter(getNewWall().columnN)) + 1), MtoVCellConverter(getNewWall().rowN), (parseInt(MtoVCellConverter(getNewWall().columnN)) + 1))
+      document.getElementById("secondPlayerWalls").innerText = getSecondPlayerWalls()
+    } else if (getNewWall().wallType === "hborder" && getNewWall().player === 1) {
+      console.log("hborder")
+      modifyHorizontalWallColor(parseInt(MtoVCellConverter(getNewWall().rowN)) - 1 + "-" + MtoVCellConverter(getNewWall().columnN), parseInt(MtoVCellConverter(getNewWall().rowN)) - 1, MtoVCellConverter(getNewWall().columnN))
+      document.getElementById("secondPlayerWalls").innerText = getSecondPlayerWalls()
+    }
+
+  }
 
   /* body.addEventListener('mouseover', event => {
      if (event.target.id ) {
@@ -234,11 +309,12 @@ function generate_table() {
    })*/
 }
 
-function chCPhtml(){
+function chCPhtml() {
   getCurrentPlayerIMGURL(getCurrentPlayer())
-  if (document.getElementById('currentPlayer').src !==getCurrentPlayerIMGURL(getCurrentPlayer())){
+  if (document.getElementById('currentPlayer').src !== getCurrentPlayerIMGURL(getCurrentPlayer())) {
     console.log(getCurrentPlayerIMGURL(getCurrentPlayer()))
-    document.getElementById('currentPlayer').src =getCurrentPlayerIMGURL(getCurrentPlayer())}
+    document.getElementById('currentPlayer').src = getCurrentPlayerIMGURL(getCurrentPlayer())
+  }
 
 }
 
@@ -270,7 +346,7 @@ function modifyHorizontalWallColor(elemId, elemDataRow, elemDataColumn, color = 
   elementUnderDot.style.backgroundColor = color;
 }
 
-function invCurrentPlayer(){
+function invCurrentPlayer() {
 
 }
 
