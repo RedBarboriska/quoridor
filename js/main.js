@@ -49,7 +49,8 @@ let firstPlayer = {
   column: MtoVCellConverter(getPlayer(0).column),
   wallsAmount: getPlayer(0).wallsAmount,
   finishCellRow: getPlayer(0).finishCellRow,
-  changePos: getPlayer(0).changePos
+  changePos: getPlayer(0).changePos,
+  image: "url('https://cdn130.picsart.com/343302759059211.png')"
 }
 let secondPlayer = {
   prevPos: {
@@ -60,7 +61,8 @@ let secondPlayer = {
   column: MtoVCellConverter(getPlayer(1).column),
   wallsAmount: getPlayer(1).wallsAmount,
   finishCellRow: getPlayer(1).finishCellRow,
-  changePos: getPlayer(1).changePos
+  changePos: getPlayer(1).changePos,
+  image: "url('https://www.pngkit.com/png/full/184-1848773_danganronpa-v3-monokuma-sprite-1-danganronpa-monokuma.png')"
 }
 let playersV = [firstPlayer, secondPlayer]
 let currentPlayer = playersV[0]
@@ -125,11 +127,12 @@ function MtoVCellConverter(rowOrColumn) {
   return parseInt(rowOrColumn) * 2 - 1
 }
 
+let gameOver
 window.onload = function () {
   generatePlayer(17, 9, 0)
   generatePlayer(1, 9, 1)
 
-  let gameOver = document.getElementById("gameOver");
+  gameOver = document.getElementById("gameOver");
   gameOver.width = 500;
   gameOver.height = 300;
   gameOver.style.position = "absolute";
@@ -147,6 +150,7 @@ restart_btn.onclick = function() {
   alert('Клик!');
 };*/
 let body = document.getElementById("game-board");
+
 function generate_table() {
 
 
@@ -195,137 +199,8 @@ function generate_table() {
     tbl.appendChild(row);
   }
   body.appendChild(tbl);
-  body.addEventListener('click', event => {
-      if (event.target.id) {
-        /*if (event.target.id === 'playII') {
-          restart_model()
-          playII()
-          generatePlayer(17, 9, 0)
-          generatePlayer(1, 9, 1)
-        } else if (event.target.id === 'playFriend') {
-          restart_model()
-          playFriend()
-          generatePlayer(17, 9, 0)
-          generatePlayer(1, 9, 1)
-        }*/
-
-        if (isFinish()) {
-          return
-        }
-        let currentPlayerNum = JSON.parse(JSON.stringify(getCurrentPlayer()))
-        //console.log("currentPlayer" + currentPlayerNum)
-        //console.log(event.target.dataset.type, event.target.id, event.target.dataset.row, event.target.dataset.column)
-        if (event.target.dataset.type === 'cell' && event.target.dataset.row === currentPlayer.row.toString() && event.target.dataset.column === currentPlayer.column.toString()) {
-          console.log("тикнули гравця")
-          playerCellTouched = 1; //вибираємо куди піти
-          console.log("тикнули гравця реально")
-
-          for (let neighborCell of getCurrentPlayerNeighbors()) {
-            // console.log(neighborCell)
-            if (neighborCell != null) {
-              let cell = document.getElementById(MtoVCellConverter(neighborCell.pos.row) + "-" + MtoVCellConverter(neighborCell.pos.column))
-              //console.log(MtoVCellConverter(neighborCell.pos.row) + "-" + MtoVCellConverter(neighborCell.pos.column))
-              //console.log(cell)
-              lightCells.push(cell)
-              cell.style.backgroundColor = "#d137d5"
-            }
-          }
-          /*підсвітити cell поруч в які можна піти! (в яких сусіди не нал)*/
-        } else {
-          if (playerCellTouched && isCurrentPlayerNeighbor(VtoMCellConverter(event.target.dataset.row) + "-" + VtoMCellConverter(event.target.dataset.column))) {
-            removePlayer(currentPlayer.row, currentPlayer.column)
-
-
-            changeCurrentPlayerPos(VtoMCellConverter(event.target.dataset.row), VtoMCellConverter(event.target.dataset.column), currentPlayerNum)
-            chCPhtml()
-            updateCurrentPlayer()
-            //let playerRow = event.target.dataset.row
-            //let playerColumn = event.target.dataset.column
-            //console.log("генерили тут", playerRow + "-" + playerColumn)
-            //playerRow = event.target.dataset.row
-            //playerColumn = event.target.dataset.column
-            //console.log("генеримо тут", playerRow + "-" + playerColumn)
-            if (isFinish() === 1) {
-              alert("Game over! Виграв гравець")
-            }
-            generatePlayer(currentPlayer.row, currentPlayer.column, currentPlayerNum)
-            if (!getIsTwoRealPlayers()/*&&getCurrentPlayer()===1*/) {
-              console.log("II запускається")
-              goII()
-
-            } else {
-              chCP()
-            }
-            //console.log("гравці",playersV)
-            //if(isFinish){alert("Game over! Виграв гравець")
-            //if
-
-          }
-          playerCellTouched = 0
-          if (lightCells.length !== 0) {
-            for (let lightCell of lightCells) {
-              lightCell.style.backgroundColor = "#ccc"
-
-            }
-          }
-        }
-
-        if (event.target.dataset.type === 'vborder') {
-          //console.log(event.target)
-          //console.log(event.target.dataset.row)
-
-          //console.log(parseInt(event.target.dataset.row), VtoMCellConverter(event.target.dataset.row))
-          //console.log(parseInt(event.target.dataset.column) - 1, VtoMCellConverter(parseInt(event.target.dataset.column) - 1))
-
-          if (canAddWall(VtoMCellConverter(parseInt(event.target.dataset.row)), VtoMCellConverter(parseInt(event.target.dataset.column) - 1), event.target.dataset.type)) {
-            addWallToGraph(VtoMCellConverter(parseInt(event.target.dataset.row)), VtoMCellConverter(parseInt(event.target.dataset.column) - 1), event.target.dataset.type)
-            chCPhtml()
-            updatePWallsCounter()
-            console.log("я тут")
-
-            modifyVerticalWallColor(event.target.id, event.target.dataset.row, event.target.dataset.column)
-            if (!getIsTwoRealPlayers()/*&&getCurrentPlayer()===1*/) {
-              console.log("II запускається")
-              goII()
-            } else {
-              chCP()
-            }
-            //console.log("гравці",playersV)
-          }
-        } else if (event.target.dataset.type === 'hborder') {
-
-          //console.log(parseInt(event.target.dataset.row) + 1, VtoMCellConverter(parseInt(event.target.dataset.row) + 1))
-          //console.log(parseInt(event.target.dataset.column), VtoMCellConverter(parseInt(event.target.dataset.column)))
-
-          if (canAddWall(VtoMCellConverter(parseInt(event.target.dataset.row) + 1), VtoMCellConverter(parseInt(event.target.dataset.column)), event.target.dataset.type)) {
-            addWallToGraph(VtoMCellConverter(parseInt(event.target.dataset.row) + 1), VtoMCellConverter(parseInt(event.target.dataset.column)), event.target.dataset.type)
-            chCPhtml()
-            updatePWallsCounter()
-            console.log("я тут")
-            modifyHorizontalWallColor(event.target.id, event.target.dataset.row, event.target.dataset.column)
-            if (!getIsTwoRealPlayers()/*&&getCurrentPlayer()===1*/) {
-              console.log("II запускається")
-              goII()
-
-            } else {
-              chCP()
-            }
-          }
-
-          //modifyHorizontalWallColor(event.target.id, event.target.dataset.row, event.target.dataset.column)
-          chCP()
-          console.log("гравці", playersV)
-        }
-        /*cellEvent(event.target.dataset.row, event.target.dataset.column)*/
-        else {
-          console.log("фігня")
-          console.log(getCurrentPlayerRow() + "" + getCurrentPlayerColumn())
-        }
-
-      }
-    }
+  body.addEventListener('click', gameBoard
   )
-
 
 
   /* body.addEventListener('mouseover', event => {
@@ -352,22 +227,155 @@ function generate_table() {
      }
    })*/
 }
+
+function gameBoard(event) {
+  if (event.target.id) {
+
+
+    if (isFinish()) {
+      gameOver.style.left = "500px";
+      gameOver.style.top = "300px";
+      return
+    }
+    let currentPlayerNum = JSON.parse(JSON.stringify(getCurrentPlayer()))
+    //console.log("currentPlayer" + currentPlayerNum)
+    //console.log(event.target.dataset.type, event.target.id, event.target.dataset.row, event.target.dataset.column)
+    if (event.target.dataset.type === 'cell' && event.target.dataset.row === currentPlayer.row.toString() && event.target.dataset.column === currentPlayer.column.toString()) {
+      console.log("тикнули гравця")
+      playerCellTouched = 1; //вибираємо куди піти
+      console.log("тикнули гравця реально")
+
+      for (let neighborCell of getCurrentPlayerNeighbors()) {
+        // console.log(neighborCell)
+        if (neighborCell != null) {
+          let cell = document.getElementById(MtoVCellConverter(neighborCell.pos.row) + "-" + MtoVCellConverter(neighborCell.pos.column))
+          //console.log(MtoVCellConverter(neighborCell.pos.row) + "-" + MtoVCellConverter(neighborCell.pos.column))
+          //console.log(cell)
+          lightCells.push(cell)
+          cell.style.backgroundColor = "#d137d5"
+        }
+      }
+      /*підсвітити cell поруч в які можна піти! (в яких сусіди не нал)*/
+    } else {
+      if (playerCellTouched && isCurrentPlayerNeighbor(VtoMCellConverter(event.target.dataset.row) + "-" + VtoMCellConverter(event.target.dataset.column))) {
+        removePlayer(currentPlayer.row, currentPlayer.column)
+
+
+        changeCurrentPlayerPos(VtoMCellConverter(event.target.dataset.row), VtoMCellConverter(event.target.dataset.column), currentPlayerNum)
+        chCPhtml()
+        updateCurrentPlayer()
+        //let playerRow = event.target.dataset.row
+        //let playerColumn = event.target.dataset.column
+        //console.log("генерили тут", playerRow + "-" + playerColumn)
+        //playerRow = event.target.dataset.row
+        //playerColumn = event.target.dataset.column
+        //console.log("генеримо тут", playerRow + "-" + playerColumn)
+        if (isFinish() === 1) {
+          if (currentPlayerNum) {
+            alert("Game over! Виграв другий гравець")
+          } else {
+            alert("Game over! Виграв перший гравець")
+          }
+        }
+        generatePlayer(currentPlayer.row, currentPlayer.column, currentPlayerNum)
+        if (!getIsTwoRealPlayers()/*&&getCurrentPlayer()===1*/) {
+          console.log("II запускається")
+          goII()
+
+        } else {
+          chCP()
+        }
+        //console.log("гравці",playersV)
+        //if(isFinish){alert("Game over! Виграв гравець")
+        //if
+
+      }
+      playerCellTouched = 0
+      if (lightCells.length !== 0) {
+        for (let lightCell of lightCells) {
+          lightCell.style.backgroundColor = "#ccc"
+
+        }
+      }
+    }
+
+    if (event.target.dataset.type === 'vborder') {
+      //console.log(event.target)
+      //console.log(event.target.dataset.row)
+
+      //console.log(parseInt(event.target.dataset.row), VtoMCellConverter(event.target.dataset.row))
+      //console.log(parseInt(event.target.dataset.column) - 1, VtoMCellConverter(parseInt(event.target.dataset.column) - 1))
+
+      if (canAddWall(VtoMCellConverter(parseInt(event.target.dataset.row)), VtoMCellConverter(parseInt(event.target.dataset.column) - 1), event.target.dataset.type)) {
+        addWallToGraph(VtoMCellConverter(parseInt(event.target.dataset.row)), VtoMCellConverter(parseInt(event.target.dataset.column) - 1), event.target.dataset.type)
+        chCPhtml()
+        updatePWallsCounter()
+        console.log("я тут")
+
+        modifyVerticalWallColor(event.target.id, event.target.dataset.row, event.target.dataset.column)
+        if (!getIsTwoRealPlayers()/*&&getCurrentPlayer()===1*/) {
+          console.log("II запускається")
+          goII()
+        } else {
+          chCP()
+        }
+        //console.log("гравці",playersV)
+      }
+    } else if (event.target.dataset.type === 'hborder') {
+
+      //console.log(parseInt(event.target.dataset.row) + 1, VtoMCellConverter(parseInt(event.target.dataset.row) + 1))
+      //console.log(parseInt(event.target.dataset.column), VtoMCellConverter(parseInt(event.target.dataset.column)))
+
+      if (canAddWall(VtoMCellConverter(parseInt(event.target.dataset.row) + 1), VtoMCellConverter(parseInt(event.target.dataset.column)), event.target.dataset.type)) {
+        addWallToGraph(VtoMCellConverter(parseInt(event.target.dataset.row) + 1), VtoMCellConverter(parseInt(event.target.dataset.column)), event.target.dataset.type)
+        chCPhtml()
+        updatePWallsCounter()
+        console.log("я тут")
+        modifyHorizontalWallColor(event.target.id, event.target.dataset.row, event.target.dataset.column)
+        if (!getIsTwoRealPlayers()/*&&getCurrentPlayer()===1*/) {
+          console.log("II запускається")
+          goII()
+
+        } else {
+          chCP()
+        }
+      }
+
+      //modifyHorizontalWallColor(event.target.id, event.target.dataset.row, event.target.dataset.column)
+      //chCP()
+      console.log("гравці", playersV)
+    }
+    /*cellEvent(event.target.dataset.row, event.target.dataset.column)*/
+    else {
+      console.log("фігня")
+      console.log(getCurrentPlayerRow() + "" + getCurrentPlayerColumn())
+    }
+
+  }
+}
+
+
 function goII() {
   updatePlayer(1)
   if (playersV[1].changePos) {
     removePlayer(playersV[1].prevPos.row, playersV[1].prevPos.column)
     generatePlayer(playersV[1].row, playersV[1].column, 1)
-  }else {
-  console.log("wallType", getNewWall().wallType)
-  if (getNewWall().wallType === "vborder" && getNewWall().player === 1) {
 
-    modifyVerticalWallColor(MtoVCellConverter(getNewWall().rowN) + "-" + (parseInt(MtoVCellConverter(getNewWall().columnN)) + 1), MtoVCellConverter(getNewWall().rowN), (parseInt(MtoVCellConverter(getNewWall().columnN)) + 1))
-    document.getElementById("secondPlayerWalls").innerText = getSecondPlayerWalls()
-  } else if (getNewWall().wallType === "hborder" && getNewWall().player === 1) {
-    console.log("hborder")
-    modifyHorizontalWallColor(parseInt(MtoVCellConverter(getNewWall().rowN)) - 1 + "-" + MtoVCellConverter(getNewWall().columnN), parseInt(MtoVCellConverter(getNewWall().rowN)) - 1, MtoVCellConverter(getNewWall().columnN))
-    document.getElementById("secondPlayerWalls").innerText = getSecondPlayerWalls()
-  }}
+    if (isFinish() === 1) {
+      alert("Game over! Виграв другий гравець")
+    }
+  } else {
+    console.log("wallType", getNewWall().wallType)
+    if (getNewWall().wallType === "vborder" && getNewWall().player === 1) {
+
+      modifyVerticalWallColor(MtoVCellConverter(getNewWall().rowN) + "-" + (parseInt(MtoVCellConverter(getNewWall().columnN)) + 1), MtoVCellConverter(getNewWall().rowN), (parseInt(MtoVCellConverter(getNewWall().columnN)) + 1))
+      document.getElementById("secondPlayerWalls").innerText = getSecondPlayerWalls()
+    } else if (getNewWall().wallType === "hborder" && getNewWall().player === 1) {
+      console.log("hborder")
+      modifyHorizontalWallColor(parseInt(MtoVCellConverter(getNewWall().rowN)) - 1 + "-" + MtoVCellConverter(getNewWall().columnN), parseInt(MtoVCellConverter(getNewWall().rowN)) - 1, MtoVCellConverter(getNewWall().columnN))
+      document.getElementById("secondPlayerWalls").innerText = getSecondPlayerWalls()
+    }
+  }
 
 }
 
@@ -395,7 +403,7 @@ function playFriend_btn() {
 }
 
 function restart() {
-  //body.removeEventListener('click', gameBoard);
+  body.removeEventListener('click', gameBoard);
   document.getElementById("game-board").innerHTML = "";
   restart_model()
   updatePlayer(0)
@@ -433,10 +441,7 @@ function chCP() {
 // Функция, изменяющая цвет
 function modifyVerticalWallColor(elemId, elemDataRow, elemDataColumn, color = "#22cad2") {
   if (elemDataRow === '17') return
-  //console.log(elemId);
-  //console.log(elemDataRow);
-  //console.log(elemDataColumn);
-  //console.log((parseInt(elemDataRow) + 1) + "-" + elemDataColumn);
+
   let element = document.getElementById(elemId);
   let elementDot = document.getElementById((parseInt(elemDataRow) + 1) + "-" + elemDataColumn);
   let elementUnderDot = document.getElementById((parseInt(elemDataRow) + 2) + "-" + elemDataColumn);
@@ -462,28 +467,19 @@ function invCurrentPlayer() {
 
 }
 
-function generatePlayer(row, column, currentPlayer) {
-  /*row=(row+1)/2
-  column=(column+1)/2*/
+function generatePlayer(row, column, playerNum) {
+
   let playerCell = document.getElementById(row + "-" + column)
   console.log(playerCell);
-  /*
-    let playerImg = document.createElement("img");
-    playerImg.dataset.row=row;
-    playerImg.dataset.column=column;                      просто міняємо фон ячейки
-    playerImg.style.width = "40px";
-    playerImg.style.height = "40px";*/
-  if (!currentPlayer) {
 
-    /*playerImg.id = "playerImg"
-    playerImg.src = playerSRC;*/
-    //playerCell.style.backgroundImage = "url('https://cdn130.picsart.com/343302759059211.png')";
-    playerCell.style.backgroundImage = "url('https://cdn130.picsart.com/343302759059211.png')";
+  if (!playerNum) {
+
+
+    playerCell.style.backgroundImage = playersV[0].image;
     playerCell.style.backgroundSize = "cover"
   } else {
-    /* playerImg.id = "compImg"
-     playerImg.src = compSRC;*/
-    playerCell.style.backgroundImage = "url('https://www.pngkit.com/png/full/184-1848773_danganronpa-v3-monokuma-sprite-1-danganronpa-monokuma.png')";
+
+    playerCell.style.backgroundImage = playersV[1].image;
     playerCell.style.backgroundSize = "cover"
   }
   //playerCell.appendChild(playerImg);
