@@ -22,7 +22,7 @@ let firstPlayer = {
   column: 5,
   wallsAmount: 10,
   finishCellRow: 1,
-  changePos:0
+  changePos: 0
 }
 let secondPlayer = {
   prevPos: {
@@ -33,7 +33,7 @@ let secondPlayer = {
   column: 5,
   wallsAmount: 10,
   finishCellRow: 9,
-  changePos:0
+  changePos: 0
 }
 let players = [firstPlayer, secondPlayer]
 let currentPlayer = players[0]
@@ -70,17 +70,16 @@ function dotsInit(dots) {
 
 }
 
-export function playII(){
-  isTwoRealPlayers=0
-}
-export function playFriend(){
-  isTwoRealPlayers=1
+export function playII() {
+  isTwoRealPlayers = 0
 }
 
+export function playFriend() {
+  isTwoRealPlayers = 1
+}
 
 
-
-export function restart_model(){
+export function restart_model() {
   isGameOver = 0
   newWall = {
     rowN: 1,
@@ -97,7 +96,7 @@ export function restart_model(){
     column: 5,
     wallsAmount: 10,
     finishCellRow: 1,
-    changePos:0
+    changePos: 0
   }
   //console.log("гравці рестартнуті",players)
   players[1] = {
@@ -109,25 +108,28 @@ export function restart_model(){
     column: 5,
     wallsAmount: 10,
     finishCellRow: 9,
-    changePos:0
+    changePos: 0
   }
-  firstPlayer=players[0]
-  secondPlayer=players[1]
-  currentPlayer=players[0]
+  firstPlayer = players[0]
+  secondPlayer = players[1]
+  currentPlayer = players[0]
   //console.log("поточний гравець",currentPlayer)
   //console.log("гравці рестартнуті",players)
 
   graphInit(graph);
   dotsInit(dots)
 }
+
 export function getCurrentPlayer() {
   //console.log(currentPlayer)
   if (currentPlayer === players[0]) return 0
   else return 1
 }
-export function getPlayer(num){
+
+export function getPlayer(num) {
   return players[num]
 }
+
 export function isFinish() {
   return isGameOver
 }
@@ -146,13 +148,12 @@ export function getSecondPlayerWalls() {
 }
 
 export function getCurrentPlayerRow() {
-  // console.log(currentPlayer)
-  // console.log(currentPlayer)
+
   return currentPlayer.row
 }
 
 export function getCurrentPlayerColumn() {
-  //console.log(currentPlayer)
+
   return currentPlayer.column
 }
 
@@ -161,24 +162,19 @@ export function changeCurrentPlayerPos(newRow, newColumn) {
   currentPlayer.prevPos.column = JSON.parse(JSON.stringify(currentPlayer.column))
   currentPlayer.row = newRow
   currentPlayer.column = newColumn
-  currentPlayer.changePos=1
-  //console.log(currentPlayer.row)
-  //console.log(currentPlayer.column)
-  //console.log(currentPlayer.finishCellRow)
+  currentPlayer.changePos = 1
+
   if ((currentPlayer.row) === currentPlayer.finishCellRow) {
 
     isGameOver = 1
     return
   }
   changeCurrentPlayer()
-
-  //console.log(firstPlayer)
 }
 
 export function changePlayerPos(newRow, newColumn) {
   players[0].row = newRow
   players[0].column = newColumn
-  //console.log(firstPlayer)
 }
 
 function changeCurrentPlayer() {
@@ -206,19 +202,13 @@ function goII() {
           notNullNeighbors.push(neighbors[i])
         }
       }
-      //console.log(notNullNeighbors)
       let newN = Math.round(Math.random() * (notNullNeighbors.length - 1))
-      //console.log(newN)
       changeCurrentPlayerPos(notNullNeighbors[newN].pos.row, notNullNeighbors[newN].pos.column)
-      //secondPlayer.row = notNullNeighbors[newN].pos.row
-      //secondPlayer.column = notNullNeighbors[newN].pos.column
-      //console.log(secondPlayer)
       return;
     } else {
 
       let row = Math.round(Math.random() * (9 - 1) + 1)
       let column = Math.round(Math.random() * (9 - 1) + 1)
-     // console.log("ставимо тут " + row + "-" + column)
       let wallType
       if (Math.round(Math.random())) {
         wallType = "vborder"
@@ -227,7 +217,6 @@ function goII() {
       }
       if (canAddWall(row, column, wallType)) {
         addWallToGraph(row, column, wallType)
-       // console.log(newWall)
         return
       }
 
@@ -239,7 +228,6 @@ function goII() {
 
 export function getPlayerRow(num) {
   if (num) {
-    //console.log(secondPlayer.row)
     return players[1].row
   } else {
     return players[0].row
@@ -351,7 +339,6 @@ export function isCurrentPlayerNeighbor(askedID) {
 
   let askedCell = graph[askedID]
 
-  //let playerCell = graph[currentPlayer.row + "-" + currentPlayer.column]
   let neighbors = getCurrentPlayerNeighbors()
   for (let neighborCell of neighbors) {
     if (askedCell === neighborCell) {
@@ -363,23 +350,6 @@ export function isCurrentPlayerNeighbor(askedID) {
 }
 
 
-/*
-export function isPlayerNeighbor1(graph, askedRow, askedColumn, playerRow, playerColumn) {
-  askedRow = VtoMCellConverter(askedRow)
-  askedColumn = VtoMCellConverter(askedColumn)
-  playerRow = VtoMCellConverter(playerRow)
-  playerColumn = VtoMCellConverter(playerColumn)
-  let askedCell = graph[askedRow + "-" + askedColumn]
-  let playerCell = graph[playerRow + "-" + playerColumn]
-  let neighbors = [playerCell.leftN, playerCell.rightN, playerCell.topN, playerCell.bottomN]
-  for (let neighborCell of neighbors) {
-    if (askedCell === neighborCell) {
-      return true
-    }
-  }
-  return false
-}
-*/
 export function graphInit(graph) {
 
   let first = 1;
@@ -392,10 +362,6 @@ export function graphInit(graph) {
 
   for (let i = first; i <= last; i++) {
     for (let j = first; j <= last; j++) {
-      /*graph[i + "-" + j].leftN = graph[i + "-" + (j - 1)]
-        graph[i + "-" + j].rightN = graph[i + "-" + (j + 1)]
-        graph[i + "-" + j].topN = graph[(i + 1) + "-" + j]
-        graph[i + "-" + j].bottomN = graph[(i - 1) + "-" + j]*/
 
       graph[i + "-" + j].leftN = j - 1 < first ? null : graph[i + "-" + (j - 1)];
       graph[i + "-" + j].rightN = j + 1 > last ? null : graph[i + "-" + (j + 1)];
@@ -414,8 +380,6 @@ export function canAddWall(rowN, columnN, wallType) {
     let leftCellRow = parseInt(rowN);
     let leftCellColumn = parseInt(columnN);
 
-    //console.log("canReachAtLeastOne")
-//console.log(canReachAtLeastOne(graph, firstPlayerRow+"-"+firstPlayerColumn, 1))
     if (graph[leftCellRow + "-" + leftCellColumn].rightN === null
       || (graph[leftCellRow + 1 + "-" + leftCellColumn] != null && graph[leftCellRow + 1 + "-" + leftCellColumn].rightN === null)
       || leftCellRow === 9
@@ -427,7 +391,6 @@ export function canAddWall(rowN, columnN, wallType) {
       || currentPlayer.wallsAmount < 1
 
     ) {
-      // console.log("can`t Reach vertical")
       return false
     } else return true
   }
@@ -435,8 +398,6 @@ export function canAddWall(rowN, columnN, wallType) {
   if (wallType === "hborder") {
     let BottomCellRow = parseInt(rowN);
     let BottomCellColumn = parseInt(columnN);
-    // console.log("hborder")
-    // console.log(graph[BottomCellRow + "-" + BottomCellColumn].rightN === null)
 
 
     if (graph[BottomCellRow + "-" + BottomCellColumn].topN === null
@@ -448,13 +409,7 @@ export function canAddWall(rowN, columnN, wallType) {
       || !canReachAtLeastOne(graph, players[0].row + "-" + players[0].column, players[0].finishCellRow, BottomCellRow, BottomCellColumn, wallType)
       || !canReachAtLeastOne(graph, players[1].row + "-" + players[1].column, players[1].column, BottomCellRow, BottomCellColumn, wallType)
       || currentPlayer.wallsAmount < 1
-      //|| (graph[BottomCellRow + "-" + (BottomCellColumn + 1)] != null && graph[BottomCellRow + "-" + (BottomCellColumn + 1)].topN === null)
-      /*graph[BottomCellRow + "-" + BottomCellColumn].topN === null
-      || (graph[BottomCellRow + "-" + (BottomCellColumn + 1)] === null)
-      || (graph[BottomCellRow + "-" + (BottomCellColumn + 1)] != null && graph[BottomCellRow + "-" + (BottomCellColumn + 1)].topN === null)
-      || (graph[BottomCellRow + "-" + (BottomCellColumn - 1)] != null && graph[BottomCellRow + "-" + (BottomCellColumn - 1)].topN === null)
-      || !canReachAtLeastOne(addWall(graph,rowN,columnN,wallType), firstPlayerRow+"-"+firstPlayerColumn, 1)*/) {
-      // console.log("can`t Reach horizon")
+    ) {
       return false
     } else return true
   }
@@ -464,7 +419,7 @@ export function canAddWall(rowN, columnN, wallType) {
 export function addWallToGraph(rowN, columnN, wallType) {
   graph = addWall(graph, dots, rowN, columnN, wallType)
   currentPlayer.wallsAmount = currentPlayer.wallsAmount - 1
-  currentPlayer.changePos=0
+  currentPlayer.changePos = 0
   newWall.rowN = rowN
   newWall.columnN = columnN
   newWall.wallType = wallType
@@ -473,10 +428,9 @@ export function addWallToGraph(rowN, columnN, wallType) {
   } else {
     newWall.player = 1
   }
- // console.log("newWall", newWall)
-  //console.log("currentPlayer", currentPlayer)
+
   changeCurrentPlayer()
-  //console.log("currentPlayer", currentPlayer)
+
 }
 
 // вертикально лівий сусід
@@ -528,21 +482,13 @@ function deleteWall(rowN, columnN, wallType) {
     graph[rowN + "-" + columnN].topN = rowN - 1 < 1 ? null : graph[(rowN - 1) + "-" + columnN];
     graph[(rowN - 1) + "-" + columnN].bottomN = rowN > 9 ? null : graph[(rowN) + "-" + columnN];
 
-    // console.log(graph[(rowN) + "-" + columnN])
-    //console.log(graph[(rowN-1) + "-" + columnN])
     if (rowN + "-" + (columnN + 1) != null) {
       graph[rowN + "-" + (columnN + 1)].topN = rowN - 1 < 1 ? null : graph[(rowN - 1) + "-" + (columnN + 1)];
       graph[rowN - 1 + "-" + (columnN + 1)].bottomN = rowN > 9 ? null : graph[(rowN) + "-" + (columnN + 1)];
 
-      //console.log(graph[(rowN) + "-" + columnN])
-      //console.log(graph[(rowN-1) + "-" + columnN])
     }
   }
-  /*
-      graph[i + "-" + j].leftN = j - 1 < first ? null : graph[i + "-" + (j - 1)];
-      graph[i + "-" + j].rightN = j + 1 > last ? null : graph[i + "-" + (j + 1)];
-      graph[i + "-" + j].bottomN = i + 1 > last ? null : graph[(i + 1) + "-" + j];
-      graph[i + "-" + j].topN = i - 1 < first ? null : graph[(i - 1) + "-" + j];*/
+
 }
 
 function canReachAtLeastOne(graph, startID, appointedRow, rowN, column, wallType) {
@@ -552,67 +498,38 @@ function canReachAtLeastOne(graph, startID, appointedRow, rowN, column, wallType
   for (let j = first; j <= last; j++) {
     if (canReach(addWall(graph, JSON.parse(JSON.stringify(dots)), rowN, column, wallType), graph[startID], graph[appointedRow + "-" + j])) {
       deleteWall(rowN, column, wallType)
-      //currentPlayer.wallsAmount=currentPlayer.wallsAmount+1
       return true;
     }
   }
-  // console.log(graph)
   deleteWall(rowN, column, wallType)
-  //currentPlayer.wallsAmount=currentPlayer.wallsAmount+1
   return false;
 }
 
 function canReach(graph, startCell, finishCell) {
-  // graph - мап обьектов
-  // startCell - начальная вершина
-  // finishCell - пункт назначения
 
-  //graph=JSON.parse(JSON.stringify(graph))
-  // инициализируем очередь
   let queue = []
-  // добавляем startCell в очередь
   queue.push(startCell)
-  // помечаем startCell как посещенную вершину во избежание повторного добавления в очередь
   startCell.visited = true
   while (queue.length > 0) {
-    // удаляем первый (верхний) элемент из очереди
     let currentCell = queue.shift()
     let neighbors = [currentCell.leftN, currentCell.rightN, currentCell.topN, currentCell.bottomN]
     for (let neighborCell of neighbors) {
-      // если сосед не посещался
-      if (neighborCell != null) {//тут треба ще подумать
+      if (neighborCell != null) {
         if (!neighborCell.visited) {
-          // добавляем его в очередь
           queue.push(neighborCell)
-          // помечаем вершину как посещенную
           neighborCell.visited = true
-          // если сосед является пунктом назначения, мы победили
-
-
           try {
-
             if (neighborCell === finishCell) {
-              // console.log('graph', graph)
-
-              /*for (let element in graph) {
-                element.visited = false
-              }*/
               Object.keys(graph).forEach(key => graph[key].visited = false)
               return true
             }
           } catch (e) {
-            // console.log(e)
           }
-
-
         }
       }
     }
   }
-  // если finishCell не обнаружено, значит пункта назначения достичь невозможно
-  /*for (let element of graph) {
-    element.visited = false
-  }*/
+
   Object.keys(graph).forEach(key => graph[key].visited = false)
   return false
 }
