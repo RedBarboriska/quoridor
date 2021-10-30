@@ -61,7 +61,10 @@ body {
   display: flex;
   flex-direction: row;
 }
-
+#points{
+  display: flex;
+  flex-direction: row;
+}
 .walls-parent{
   display: flex;
   flex-direction: column;

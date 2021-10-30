@@ -18,11 +18,15 @@ import {
 
   getFirstPlayerWalls,
   getSecondPlayerWalls,
-  getIsTwoRealPlayers
+  getIsTwoRealPlayers,
+  resetCounterModel
 } from './model'
 
-
-document.getElementById("playII_btn").style.backgroundColor = "#d137d5"
+if (!getIsTwoRealPlayers()) {
+  document.getElementById("playII_btn").style.backgroundColor = "#d137d5"
+} else {
+  document.getElementById("playFriend_btn").style.backgroundColor = "#d137d5"
+}
 
 let playerCellTouched = 0;
 let lightCells = []
@@ -38,6 +42,7 @@ let firstPlayer = {
   wallsAmount: getPlayer(0).wallsAmount,
   finishCellRow: getPlayer(0).finishCellRow,
   changePos: getPlayer(0).changePos,
+  points:getPlayer(0).points,
   image: "url('https://cdn130.picsart.com/343302759059211.png')"
 }
 let secondPlayer = {
@@ -50,6 +55,7 @@ let secondPlayer = {
   wallsAmount: getPlayer(1).wallsAmount,
   finishCellRow: getPlayer(1).finishCellRow,
   changePos: getPlayer(1).changePos,
+  points:getPlayer(1).points,
   image: "url('https://www.pngkit.com/png/full/184-1848773_danganronpa-v3-monokuma-sprite-1-danganronpa-monokuma.png')"
 }
 let playersV = [firstPlayer, secondPlayer]
@@ -62,6 +68,7 @@ function updatePlayer(num) {
   playersV[num].column = MtoVCellConverter(getPlayer(num).column)
   playersV[num].wallsAmount = getPlayer(num).wallsAmount
   playersV[num].changePos = getPlayer(num).changePos
+  playersV[num].points=getPlayer(num).points
 }
 
 function updateCurrentPlayer() {
@@ -214,21 +221,25 @@ function gameBoard(event) {
         changeCurrentPlayerPos(VtoMCellConverter(event.target.dataset.row), VtoMCellConverter(event.target.dataset.column), currentPlayerNum)
         chCPhtml()
         updateCurrentPlayer()
-        let finish=isFinish()
+        let finish = isFinish()
         if (isFinish() === 1) {
           if (currentPlayerNum) {
             alert("Game over! Виграв другий гравець")
+            document.getElementById("spPoints").textContent=playersV[1].points
 
           } else {
             alert("Game over! Виграв перший гравець")
-
+            document.getElementById("fpPoints").textContent=playersV[0].points
           }
         }
         generatePlayer(currentPlayer.row, currentPlayer.column, currentPlayerNum)
         if (!getIsTwoRealPlayers()/*&&getCurrentPlayer()===1*/) {
           console.log("II запускається")
           goII()
-          if(isFinish()!==finish){alert("Game over! Виграв другий гравець")}
+          if (isFinish() !== finish) {
+            alert("Game over! Виграв другий гравець")
+            document.getElementById("spPoints").textContent=playersV[1].points
+          }
 
         } else {
           chCP()
@@ -321,6 +332,15 @@ function updatePWallsCounter() {
 document.getElementById("restart_btn").addEventListener("click", () => restart());
 document.getElementById("playII_btn").addEventListener("click", () => playII_btn());
 document.getElementById("playFriend_btn").addEventListener("click", () => playFriend_btn());
+document.getElementById("resetСounter_btn").addEventListener("click", () => resetСounter());
+
+function resetСounter(){
+  resetCounterModel()
+  updatePlayer(0)
+  updatePlayer(1)
+  document.getElementById("spPoints").textContent=playersV[1].points
+  document.getElementById("fpPoints").textContent=playersV[0].points
+}
 
 function playII_btn() {
   document.getElementById("playFriend_btn").style.backgroundColor = ""

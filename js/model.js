@@ -22,7 +22,8 @@ let firstPlayer = {
   column: 5,
   wallsAmount: 10,
   finishCellRow: 1,
-  changePos: 0
+  changePos: 0,
+  points:0
 }
 let secondPlayer = {
   prevPos: {
@@ -33,7 +34,8 @@ let secondPlayer = {
   column: 5,
   wallsAmount: 10,
   finishCellRow: 9,
-  changePos: 0
+  changePos: 0,
+  points:0
 }
 let players = [firstPlayer, secondPlayer]
 let currentPlayer = players[0]
@@ -79,6 +81,7 @@ export function playFriend() {
 }
 
 
+
 export function restart_model() {
   isGameOver = 0
   newWall = {
@@ -87,7 +90,7 @@ export function restart_model() {
     wallType: "hboard",
     player: 0
   }
-  players[0] = {
+  /*players[0] = {
     prevPos: {
       row: 9,
       column: 5,
@@ -97,9 +100,15 @@ export function restart_model() {
     wallsAmount: 10,
     finishCellRow: 1,
     changePos: 0
-  }
+  }*/
+  players[0].prevPos.row=9
+  players[0].prevPos.column=5
+  players[0].row=9
+  players[0].column=5
+  players[0].wallsAmount=10
+
   //console.log("гравці рестартнуті",players)
-  players[1] = {
+  /*players[1] = {
     prevPos: {
       row: 1,
       column: 5,
@@ -109,7 +118,15 @@ export function restart_model() {
     wallsAmount: 10,
     finishCellRow: 9,
     changePos: 0
-  }
+  }*/
+
+  players[1].prevPos.row=1
+  players[1].prevPos.column=5
+  players[1].row=1
+  players[1].column=5
+  players[1].wallsAmount=10
+
+
   firstPlayer = players[0]
   secondPlayer = players[1]
   currentPlayer = players[0]
@@ -118,6 +135,11 @@ export function restart_model() {
 
   graphInit(graph);
   dotsInit(dots)
+}
+
+export function resetCounterModel(){
+  players[0].points=0
+  players[1].points=0
 }
 
 export function getCurrentPlayer() {
@@ -167,6 +189,7 @@ export function changeCurrentPlayerPos(newRow, newColumn) {
   if ((currentPlayer.row) === currentPlayer.finishCellRow) {
 
     isGameOver = 1
+    currentPlayer.points=currentPlayer.points+1
     return
   }
   changeCurrentPlayer()
