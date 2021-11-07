@@ -424,8 +424,6 @@ function invCurrentPlayer() {
 function generatePlayer(row, column, playerNum) {
 
   let playerCell = document.getElementById(row + "-" + column)
-  console.log(playerCell);
-
   if (!playerNum) {
 
 
